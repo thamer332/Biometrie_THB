@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THB - Traitement d'Images</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="background-animation"></div>
+    
+    <div class="container">
+        <header class="header">
+            <h1 class="title">
+                <span class="icon">🎨</span>
+                Biométrie THB
+                <span class="badge"></span>
+            </h1>
+            <p class="subtitle">Traitement d'images professionnel</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-box" id="uploadBox">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <div class="upload-content">
+                    <div class="upload-icon">📁</div>
+                    <h3>Choisir une image</h3>
+                    <p>Glissez-déposez ou cliquez pour sélectionner</p>
+                    <button class="btn btn-primary" id="browseBtn">
+                        Parcourir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel" id="controlPanel" style="display: none;">
+            <div class="panel-section">
+                <h3><span class="icon">📐</span> Partie 2 : Redimensionnement</h3>
+                <p class="description">Modifie la taille de l'image en pixels</p>
+                <div class="controls-grid">
+                    <div class="input-group">
+                        <label>Largeur (px)</label>
+                        <input type="number" id="resizeWidth" value="200" min="10" max="2000">
+                    </div>
+                    <div class="input-group">
+                        <label>Hauteur (px)</label>
+                        <input type="number" id="resizeHeight" value="200" min="10" max="2000">
+                    </div>
+                </div>
+                <button class="btn btn-action" onclick="processImage('resize')">Redimensionner</button>
+            </div>
+
+            <div class="panel-section">
+                <h3><span class="icon">💡</span> Partie 3 : Luminosité</h3>
+                <p class="description">Ajuste la quantité de lumière de l'image</p>
+                <div class="controls-grid">
+                    <div class="input-group">
+                        <label>Facteur de luminosité</label>
+                        <input type="range" id="brightness" min="0.5" max="2" step="0.1" value="1.5">
+                        <span id="brightnessValue">1.5</span>
+                    </div>
+                </div>
+                <button class="btn btn-action" onclick="processImage('brightness')">Ajuster Luminosité</button>
+            </div>
+
+            <div class="panel-section">
+                <h3><span class="icon">⚫</span> Partie 4 : Niveaux de gris</h3>
+                <p class="description">Convertit l'image en nuances de gris (noir au blanc)</p>
+                <button class="btn btn-filter" onclick="processImage('grayscale')">Convertir en Niveaux de Gris</button>
+            </div>
+
+            <div class="panel-section">
+                <h3><span class="icon">⬛</span> Partie 5 : Binarisation</h3>
+                <p class="description">Transforme l'image en noir et blanc pur selon un seuil</p>
+                <div class="controls-grid">
+                    <div class="input-group">
+                        <label>Seuil (0-255)</label>
+                        <input type="range" id="binarizeThreshold" min="0" max="255" step="1" value="128">
+                        <span id="binarizeValue">128</span>
+                    </div>
+                </div>
+                <button class="btn btn-filter" onclick="processImage('binarize')">Binariser</button>
+            </div>
+
+            <div class="panel-section">
+                <h3><span class="icon">🔍</span> Partie 6 : Détection des contours</h3>
+                <p class="description">Met en évidence les frontières des objets</p>
+                <button class="btn btn-filter" onclick="processImage('edge_detect')">Détecter les Contours</button>
+            </div>
+
+            <div class="panel-section">
+                <h3><span class="icon">🌫️</span> Partie 7 : Flou Gaussien</h3>
+                <p class="description">Réduit le bruit et améliore la qualité visuelle</p>
+                <div class="controls-grid">
+                    <div class="input-group">
+                        <label>Rayon (1-10)</label>
+                        <input type="range" id="gaussianRadius" min="1" max="10" step="1" value="2">
+                        <span id="gaussianValue">2</span>
+                    </div>
+                </div>
+                <button class="btn btn-filter" onclick="processImage('gaussian_blur')">Appliquer Flou Gaussien</button>
+            </div>
+
+            <div class="panel-section">
+                <h3><span class="icon">📊</span> Partie 8 : Histogramme</h3>
+                <p class="description">Visualise la distribution des niveaux de gris</p>
+                <button class="btn btn-action" onclick="showHistogram()">Afficher l'Histogramme</button>
+            </div>
+
+            <div class="panel-section">
+                <h3><span class="icon">📈</span> Partie 9 : Égalisation d'histogramme</h3>
+                <p class="description">Améliore le contraste en redistribuant les intensités</p>
+                <button class="btn btn-action" onclick="processImage('equalize')">Égaliser l'Histogramme</button>
+            </div>
+
+            <div class="panel-section">
+                <h3><span class="icon">🔄</span> Autres transformations</h3>
+                <div class="btn-grid">
+                    <button class="btn btn-action" onclick="processImage('rotate')">🔄 Rotation 90°</button>
+                    <button class="btn btn-action" onclick="processImage('flip_horizontal')">↔️ Miroir H</button>
+                    <button class="btn btn-action" onclick="processImage('flip_vertical')">↕️ Miroir V</button>
+                    <button class="btn btn-filter" onclick="processImage('sharpen')">✨ Netteté</button>
+                    <button class="btn btn-filter" onclick="processImage('contrast')">🎚️ Contraste</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="results" id="results" style="display: none;">
+            <div class="image-container">
+                <div class="image-box">
+                    <h3>Image Originale</h3>
+                    <img id="originalImage" alt="Original">
+                    <div class="image-info" id="originalInfo"></div>
+                </div>
+                <div class="image-box">
+                    <h3>Image Traitée</h3>
+                    <img id="resultImage" alt="Résultat">
+                    <div class="image-info" id="resultInfo"></div>
+                    <button class="btn btn-download" id="downloadBtn" style="display: none;">
+                        ⬇️ Télécharger
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="loader" id="loader" style="display: none;">
+            <div class="spinner"></div>
+            <p>Traitement en cours...</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
